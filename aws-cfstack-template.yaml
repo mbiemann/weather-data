@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Description: Weather Data
+
+Parameters:
+
+  Environment:
+    Type: String
+
+Resources:
+
+  # S3 Bucket for incoming csv and refined parquet
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub weather-data-${Environment}-${AWS::AccountId}-${AWS::Region}
+
+  # Lambda Function trigged by S3 Event on incoming-event directory
+  EventRefineFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Receive S3 Event and convert CSV to Parquet with AWS Data Wrangler
+      CodeUri: ./aws-event-driven
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      Timeout: 900
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 60
+        MaximumRetryAttempts: 0
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSDataWrangler-Python38:1
+      Policies:
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action: "*"
+              Resource: "*"
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref Bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: event-incoming
