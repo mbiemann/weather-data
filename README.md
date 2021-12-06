@@ -2,9 +2,9 @@
 
 This project aims to answer some questions about weather data from csv files, using Python and Data Engineering.
 
-Any doubt or improvement please send to mbiemann@gmail.com or create a issue in this repository. 😀 Thank you! 🖤
+> This project was made with care and dedication in a couple of days. Any questions or improvements send me a problem, I'll be happy to talk to you 😀! Thank you and enjoy 🖤
 
-There are three ways to get to the answers in this repository:
+There are many ways to get the answers, but here is the three ways chosen for this repository:
 
 1. [Using Jupyter Notebook](#1-using-jupyter-notebook)
 
