@@ -1,0 +1,2 @@
+awswrangler
+boto3
