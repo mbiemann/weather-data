@@ -183,6 +183,8 @@ ___
 
 ## AWS Deployment
 
+### Deploy
+
 The AWS Solutions was made as IaC (Infrastructure as Code).
 
 Follow the steps below for deployment:
@@ -204,3 +206,16 @@ Follow the steps below for deployment:
 ```bash
 % bash aws-cfstack-deploy.sh env bucket-name
 ```
+
+### Destroy
+
+1. Drop database by Athena, using the environment passing on deploy step 5:
+```sql
+drop database weather_env
+```
+
+2. Empty both buckets created at deploy, step 3 and step 5.
+
+3. Clear all items of DynamoDB Table created at deploy step 5.
+
+4. Delete CloudFormation Stack created at deploy step 5.
