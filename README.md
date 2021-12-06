@@ -109,6 +109,10 @@ df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
     )['Item']['answer']['S']))
 ```
 
+When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed, and the awnsers will be:
+
+![Answers DynamoDB](answers-dynamodb.png)
+
 PS: To demonstrate and track processing, the file is moved from the `event-incoming` folder to the `event-in-progress` folder. After writing the parquet, the file is moved to the `event-processed` folder. In case of error, the file is moved to the `event-error` folder along with a `.log` file with the error message.
 
 PS1: The script creates the database, if not exists:
