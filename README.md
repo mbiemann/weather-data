@@ -55,9 +55,54 @@ ___
 
 ## 2. Event-driven Solution in AWS
 
-The Python script using in Lambda Function can be found on folder [aws-event-driven](aws-event-driven).
+Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/lambda_function.py).
 
 ![AWS Diagram Event-Driven](aws-event-driven/aws-diagram-event-driven.png)
+
+This solution uses the S3 Bucket Event Triggering Mechanism to invoke a Lambda that:
+
+a. Validate if the filename ends with '.csv'
+```python
+key[-4:] != '.csv'
+```
+
+b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#3-batch-solution-in-aws))
+```python
+size >= 11000000 # in bytes
+```
+
+c. Load CSV file using [AWS Data Wrangler](https://github.com/awslabs/aws-data-wrangler)
+```python
+df = wr.s3.read_csv('s3://bucket/key')
+```
+
+d. Check expected columns
+```python
+df.columns.to_list() != ['ForecastSiteCode','ObservationTime','ObservationDate','WindDirection','WindSpeed','WindGust','Visibility','ScreenTemperature','Pressure','SignificantWeatherCode','SiteName','Latitude','Longitude','Region','Country']
+```
+
+e. Write and Catalog Parquet:
+```python
+wr.s3.to_parquet(
+    df=df,
+    path='s3://bucket/refined/',
+    dataset=True,
+    mode='append',
+    database='weather_prd',
+    table='observation'
+)
+```
+
+f. Calculates the highest temperature, compares with the previous answer if any, and saves the answers in the dynamodb question table
+```python
+df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
+        TableName='question-table',
+        Key={'question':{'S':'What was the temperature on that day?'}},
+        ConsistentRead=True
+    )['Item']['answer']['S']))
+```
+
+PS: To demonstrate and track processing, the file is moved from the `event-incoming` folder to the `event-in-progress` folder. After writing the parquet, the file is moved to the `event-processed` folder. In case of error, the file is moved to the `event-error` folder along with a `.log` file with the error message.
 
 ___
 
@@ -66,3 +111,5 @@ ___
 Python Script uses for this solution is [aws-batch/glue-script.py](aws-batch/glue-script.py).
 
 ![AWS Diagram Batch](aws-batch/aws-diagram-batch.png)
+
+PS: To demonstrate and track processing, the file is moved from the `batch-incoming` folder to the `batch-in-progress` folder. After writing the parquet, the file is moved to the `batch-processed` folder. In case of error, the file is moved to the `batch-error` folder along with a `.log` file with the error message.
