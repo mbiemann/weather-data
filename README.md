@@ -226,9 +226,10 @@ Follow the steps below for deployment:
 
 Follow the steps below for cleaning:
 
-1. Drop database by Athena, using the environment passing on deploy step 5:
+1. Drop tables and database by Athena, using the environment passing on deploy step 5:
 
 ```sql
+drop table weather_env.observation
 drop database weather_env
 ```
 

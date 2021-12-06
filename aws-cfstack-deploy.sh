@@ -78,14 +78,14 @@ echo ""
 
 ################################################################################
 
-# echo "Copying test data to bucket..."
-# echo ""
+echo "Copying test data to bucket..."
+echo ""
 
-# aws s3 cp ./test-data/ s3://$BUCKET_NAME/event-incoming/ --recursive
+aws s3 cp ./test-data/ s3://$BUCKET_NAME/event-incoming/ --recursive
 
-# aws s3 cp ./test-data/ s3://$BUCKET_NAME/batch-incoming/ --recursive
+aws s3 cp ./test-data/ s3://$BUCKET_NAME/batch-incoming/ --recursive
 
-# echo ""
+echo ""
 
 ################################################################################
 

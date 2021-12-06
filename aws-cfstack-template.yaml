@@ -148,7 +148,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(15 minutes)
-            Enabled: False
+            Enabled: True
 
 Outputs:
 
