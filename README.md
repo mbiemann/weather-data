@@ -6,11 +6,11 @@ There are three ways to get to the answers in this repository:
 
 1. [Using Jupyter Notebook](#1-using-jupyter-notebook)
 
-2. [Event-driven Solution in AWS](#2-event-driven-solution-in-aws)
+2. [Event-driven AWS Solution](#2-event-driven-aws-solution)
 
-3. [Batch Solution in AWS](#3-batch-solution-in-aws)
+3. [Batch AWS Solution](#3-batch-aws-solution)
 
-The questions to answer are:
+The questions are:
 
 - Which date was the hottest day?
 
@@ -18,13 +18,15 @@ The questions to answer are:
 
 - In which region was the hottest day?
 
+For AWS Solution, the answers can be seen in the [DynamoDB Table](#dynamodb-table).
+
 The csv files used for test are in [./test-data](test-data) folder.
 
 ___
 
 ## 1. Using Jupyter Notebook
 
-Check the notebook with the answers here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
+Check the script here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
 
 This script use Python 3 and Pandas library to:
 
@@ -51,9 +53,11 @@ df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['ObservationDate'
 df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['Region']
 ```
 
+![Answers Notebook](answers-notebook.png)
+
 ___
 
-## 2. Event-driven Solution in AWS
+## 2. Event-driven AWS Solution
 
 Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/lambda_function.py).
 
@@ -66,7 +70,7 @@ a. Validate if the filename ends with '.csv':
 key[-4:] != '.csv'
 ```
 
-b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#3-batch-solution-in-aws)):
+b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#3-batch-aws-solution)):
 ```python
 size >= 11000000 # in bytes
 ```
@@ -95,7 +99,7 @@ wr.s3.to_parquet(
 )
 ```
 
-f. Calculate the highest temperature, compares with the previous answer if exists, and save in the [Question DynamoDB Table](#answers-in-question-dynamodb-table):
+f. Calculate the highest temperature, compares with the previous answer if exists, and save in the [DynamoDB Table](#dynamodb-table):
 ```python
 df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
         TableName='question-table',
@@ -113,7 +117,7 @@ wr.catalog.create_database('weather_prd', exist_ok=True)
 
 ___
 
-## 3. Batch Solution in AWS
+## 3. Batch AWS Solution
 
 Check the script here: [./aws-batch/glue_script.py](aws-batch/glue_script.py).
 
@@ -142,7 +146,7 @@ df.write \
     .saveAsTable('weather_prd.observation')
 ```
 
-c. Calculate the highest temperature, compares with the previous answer if exists, and save in the [Question DynamoDB Table](#answers-in-question-dynamodb-table):
+c. Calculate the highest temperature, compares with the previous answer if exists, and save in the [DynamoDB Table](#dynamodb-table):
 ```python
 df.select(col('ScreenTemperature')).max().collect()[0] > float(boto3.client('dynamodb').get_item(
         TableName='question-table',
@@ -164,7 +168,11 @@ spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
 
 ___
 
-## Answers in Question DynamoDB Table
+## DynamoDB Table
+
+Both AWS Solution write the answers in same DynamoDB Table, that can be used in RestAPI, for example.
+
+![Answers DynamoDB](answers-dynamodb.png)
 
 ___
 
