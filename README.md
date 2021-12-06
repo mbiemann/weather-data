@@ -115,13 +115,13 @@ ___
 
 ## 3. Batch Solution in AWS
 
-Check the script here: [./aws-batch/glue-script.py](aws-batch/glue-script.py).
+Check the script here: [./aws-batch/glue_script.py](aws-batch/glue_script.py).
 
 ![AWS Batch Diagram](aws-batch/aws-diagram-batch.png)
 
-This batch process is scheduled each 15 minutes using EventBridge, that triggers the Step Function's state machine.
+This batch process is scheduled each 15 minutes using EventBridge, that triggers the Step Function's state machine:
 
-![Step Function](aws-batch/step-function-print.png)
+![Step Function Definition](aws-batch/step-function-definition.png)
 
 In Step Function, the first step is a simple Lambda that check if exists file to process. The next step is to start the Glue Job, passing the bucket and the list of files to be processed as parameter and do:
 
@@ -151,9 +151,13 @@ df.select(col('ScreenTemperature')).max().collect()[0] > float(boto3.client('dyn
     )['Item']['answer']['S']))
 ```
 
-PS: To demonstrate and track processing, the file is moved from the `batch-incoming` folder to the `batch-in-progress` folder. After writing the parquet, the file is moved to the `batch-processed` folder. In case of error, the file is moved to the `batch-error` folder along with a `.log` file with the error message.
+PS: If there aren't CSV files to process, the `Check for Files` Lambda Function aborts the Step Function Execution:
 
-PS1: The script creates the database, if not exists:
+![Step Function Executions](aws-batch/step-function-executions.png)
+
+PS1: To demonstrate and track processing, the file is moved from the `batch-incoming` folder to the `batch-in-progress` folder. After writing the parquet, the file is moved to the `batch-processed` folder. In case of error, the file is moved to the `batch-error` folder along with a `.log` file with the error message.
+
+PS2: The script creates the database, if not exists:
 ```python
 spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
 ```
