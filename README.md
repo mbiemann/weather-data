@@ -190,12 +190,9 @@ ___
 
 ## Query Data using Athena and Glue Data Catalog
 
+Weather data is also available for query through Athena in adjunct with the Glue Data Catalog:
 
-___
-
-# Conclusion
-
-
+![Query Athena](query-athena.png)
 
 ___
 
