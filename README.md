@@ -2,6 +2,8 @@
 
 This project aims to answer some questions about weather data from csv files, using Python and Data Engineering.
 
+Any doubt or improvement please send to mbiemann@gmail.com or create a issue in this repository. 😀 Thank you! 🖤
+
 There are three ways to get to the answers in this repository:
 
 1. [Using Jupyter Notebook](#1-using-jupyter-notebook)
@@ -76,7 +78,7 @@ b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#
 size >= 11000000 # in bytes
 ```
 
-Only for example purposes, the Lambda MemorySize is set to 256.
+This validation if only for example purposes, the Lambda MemorySize is set to 256.
 
 c. Load CSV file using [AWS Data Wrangler](https://github.com/awslabs/aws-data-wrangler):
 ```python
@@ -109,7 +111,7 @@ df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
     )['Item']['answer']['S']))
 ```
 
-When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed, and the awnsers will be:
+When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed. The file `weather.20160301.csv` is to larger (in this example) to proccess with Lambda, and the awnsers will be:
 
 ![Answers DynamoDB](answers-dynamodb.png)
 
@@ -182,6 +184,12 @@ Both AWS Solution write the answers in same DynamoDB Table, that can be used in 
 ___
 
 ## Query Data using Athena and Glue Data Catalog
+
+
+___
+
+# Conclusion
+
 
 
 ___
