@@ -20,7 +20,8 @@ The questions are:
 
 The csv files used for test are in [./test-data](test-data) folder.
 
-For AWS Solutions, the answers can be seen in the [DynamoDB Table](#dynamodb-table). Check the [AWS Deployment](#aws-deployment) instructions..
+For AWS Solutions, the answers can be seen in the [DynamoDB Table](#dynamodb-table).
+Check the [AWS Deployment](#aws-deployment) instructions for deploy or destroy on your own AWS Account.
 
 ___
 
@@ -183,9 +184,9 @@ ___
 
 ## AWS Deployment
 
-### Deploy
-
 The AWS Solutions was made as IaC (Infrastructure as Code).
+
+### Deploy
 
 Follow the steps below for deployment:
 
@@ -209,7 +210,10 @@ Follow the steps below for deployment:
 
 ### Destroy
 
+Follow the steps below for cleaning:
+
 1. Drop database by Athena, using the environment passing on deploy step 5:
+
 ```sql
 drop database weather_env
 ```

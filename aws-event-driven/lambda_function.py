@@ -1,3 +1,14 @@
+#===============================================================================
+#=== Creation: 2021-12-04 by Marcell Biemann
+#=== To analyse this code, follow the methods flow:
+#===   1. lambda_handler
+#===   2. process
+#===        move_file
+#===   3. answer_questions
+#===        get_answer
+#===        set_answer
+#===============================================================================
+
 import awswrangler as wr
 import datetime
 import boto3
@@ -12,10 +23,10 @@ _expected_columns = [
 
 #===============================================================================
 
-def _set_answer(answer,question):
+def set_answer(table, question, answer):
 
     boto3.client('dynamodb').put_item(
-        TableName=_table,
+        TableName=table,
         Item={
             'question':{'S':question},
             'answer':{'S':answer}
@@ -24,12 +35,12 @@ def _set_answer(answer,question):
 
 #===============================================================================
 
-def _get_answer(question,default):
+def get_answer(table, question, default):
     answer = default
 
     try:
         answer = boto3.client('dynamodb').get_item(
-            TableName=_table,
+            TableName=table,
             Key={'question':{'S':question}},
             ConsistentRead=True
         )['Item']['answer']['S']
@@ -40,21 +51,27 @@ def _get_answer(question,default):
 
 #===============================================================================
 
-def _answer_questions(df):
+def answer_questions(table, df):
     print('Answering questions...')
 
-    new_temp = str(df['screen_temperature'].max())
+    # get new and old high temperature
+    new_temp = str( df['screen_temperature'].max() )
+    old_temp = get_answer( table, 'What was the temperature on that day?', 0 )
 
-    old_temp = _get_answer( 'What was the temperature on that day?', 0 )
-
+    # if new is highest than old
     if ( float(new_temp) > float(old_temp) ):
 
-        new_date = str(df[ df['screen_temperature'] == df['screen_temperature'].max() ]['observation_date'].to_numpy()[0])[:10]
-        new_regn = str(df[ df['screen_temperature'] == df['screen_temperature'].max() ]['region'].to_numpy()[0])
+        # filter record with highest temperature
+        df = df[ df['screen_temperature'] == df['screen_temperature'].max() ]
 
-        _set_answer( new_temp, 'What was the temperature on that day?' )
-        _set_answer( new_date, 'Which date was the hottest day?' )
-        _set_answer( new_regn, 'In which region was the hottest day?' )
+        # get date and region
+        new_date = str(df['observation_date'].to_numpy()[0])[:10]
+        new_regn = str(df['region'].to_numpy()[0])
+
+        # update table
+        set_answer( table, 'What was the temperature on that day?', new_temp )
+        set_answer( table, 'Which date was the hottest day?', new_date )
+        set_answer( table, 'In which region was the hottest day?', new_regn )
 
         print('Answered questions!')
 
@@ -64,7 +81,7 @@ def _answer_questions(df):
 
 #===============================================================================
 
-def _move_file(bucket,key,source,target,load_dt=''):
+def move_file(bucket, key, source, target, load_dt=''):
 
     # source params
     source_prefix = '/'.join(key.split('/')[:-1])
@@ -102,8 +119,8 @@ def _move_file(bucket,key,source,target,load_dt=''):
 def process(database, question_table, bucket, key, size):
     print(f'Processing s3://{bucket}/{key}...')
 
+    actual = 'incoming'
     try:
-        actual = 'incoming'
 
         # check file extension
         if key[-4:] != '.csv':
@@ -118,7 +135,8 @@ def process(database, question_table, bucket, key, size):
         load_dt = datetime.datetime.utcnow().isoformat()
 
         # move file to in-progress
-        key = _move_file(bucket,key,actual,'in-progress',load_dt)
+        key = move_file(bucket, key, actual, 'in-progress', load_dt)
+        actual = 'in-progress'
 
         # read file
         print('CSV reading...')
@@ -141,19 +159,19 @@ def process(database, question_table, bucket, key, size):
             path=f's3://{bucket}/refined/',
             dataset=True,
             mode='append',
-            database=_database,
+            database=database,
             table='observation'
         )
         print('Parquet written!')
 
         # move file to processed
-        _move_file(bucket,key,'in-progress','processed')
+        move_file(bucket, key, actual, 'processed')
 
     except Exception as e:
         print('ERROR: '+str(e))
 
         # move file to error
-        key = _move_file(bucket,key,'in-progress','error')
+        key = move_file(bucket, key, actual, 'error')
 
         # create log file
         print('Logging error...')
@@ -168,7 +186,7 @@ def process(database, question_table, bucket, key, size):
         return
 
     # Answer Questions
-    _answer_questions(df)
+    answer_questions(question_table, df)
 
 #===============================================================================
 

@@ -68,7 +68,7 @@ Resources:
       Environment:
         Variables:
           DATABASE: !Sub weather_${Environment}
-          TABLE: !Ref QuestionTable
+          QUESTION_TABLE: !Ref QuestionTable
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSDataWrangler-Python38:1
       Events:
@@ -103,7 +103,7 @@ Resources:
         --enable-glue-datacatalog: 'true'
         --enable-s3-parquet-optimized-committer: 'true'
         --DATABASE: !Sub weather_${Environment}
-        --TABLE: !Ref QuestionTable
+        --QUESTION_TABLE: !Ref QuestionTable
 
   # Lambda Function to check files in batch-incoming directory
   CheckForFilesFunction:
