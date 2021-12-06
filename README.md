@@ -29,7 +29,7 @@ ___
 
 ## 1. Using Jupyter Notebook
 
-> Check the script here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
+> **Check the script here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb)**.
 
 This script use Python 3 and Pandas library to:
 
@@ -58,13 +58,13 @@ df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['Region']
 
 ![Answers Notebook](answers-notebook.png)
 
-> Check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
+> **Check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)**.
 
 ___
 
 ## 2. Event-driven AWS Solution
 
-> Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/lambda_function.py).
+> **Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/lambda_function.py)**.
 
 ![AWS Event-Driven Diagram](aws-event-driven/aws-diagram-event-driven.png)
 
@@ -126,13 +126,13 @@ PS1: The script creates the database, if not exists:
 wr.catalog.create_database('weather_prd', exist_ok=True)
 ```
 
-> Check the video of execution here: [https://youtu.be/Yr474u7dc8k](https://youtu.be/Yr474u7dc8k)
+> **Check the video of execution here: [https://youtu.be/Yr474u7dc8k](https://youtu.be/Yr474u7dc8k)**.
 
 ___
 
 ## 3. Batch AWS Solution
 
-> Check the script here: [./aws-batch/glue_script.py](aws-batch/glue_script.py).
+> **Check the script here: [./aws-batch/glue_script.py](aws-batch/glue_script.py)**.
 
 ![AWS Batch Diagram](aws-batch/aws-diagram-batch.png)
 
@@ -179,9 +179,9 @@ PS2: The script creates the database, if not exists:
 spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
 ```
 
-> Check the video of execution here: [https://youtu.be/pdZlQagFuBY](https://youtu.be/pdZlQagFuBY)
-
 For this execution, the parquet and database was dropped. The answer of DynamoDB Table is keeped.
+
+> **Check the video of execution here: [https://youtu.be/pdZlQagFuBY](https://youtu.be/pdZlQagFuBY)**.
 
 ___
 
