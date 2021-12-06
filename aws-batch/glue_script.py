@@ -119,33 +119,26 @@ def process(spark, database, question_table, bucket, keys):
     load_dt = datetime.datetime.utcnow().isoformat()
 
     actual = 'batch-incoming/'
-
     try:
-        df = None
 
         # Move files to in-progress
-        move_files(bucket, keys, actual, f'batch-in-progress/{load_dt}_')
-        actual = f'batch-in-progress/{load_dt}_'
+        to = f'batch-in-progress/{load_dt}_'; move_files(bucket, keys, actual, to); actual = to
 
-        # Read files
+        # Each file union on df
+        df = None
         for key in keys:
-            key = key.replace('batch-incoming/', actual)
 
-            # Read CSV
+            # Read CSV and add Columns Filename, Load Type and Datetime
             df_read = spark.read \
                 .option('header','true') \
-                .csv(f's3://{bucket}/{key}')
-
-            # Add Filename Column
-            df_read = df_read.withColumn('filename',lit(key.split('/')[-1]))
+                .csv('s3://'+bucket+'/'+key.replace('batch-incoming/',to)) \
+                .withColumn('filename',lit(key.split('/')[-1])) \
+                .withColumn('load_type',lit('BATCH')) \
+                .withColumn('load_dt',lit(load_dt))
 
             # Union All
             df = df_read if df == None else df.unionAll(df_read)
-
-        # Add Load Type and Datetime Columns
-        df = df.withColumn('load_type',lit('BATCH'))
-        df = df.withColumn('load_dt',lit(load_dt))
-
+        
         # Caching
         df.persist()
 
@@ -157,8 +150,7 @@ def process(spark, database, question_table, bucket, keys):
             .saveAsTable(f'{database}.observation')
 
         # Move files to processed
-        move_files(bucket, keys, actual, f'batch-processed/{load_dt}_')
-        actual = f'batch-processed/{load_dt}_'
+        to = f'batch-processed/{load_dt}_'; move_files(bucket, keys, actual, to); actual = to
 
         # Answer Questions
         answer_questions(question_table, df)
@@ -170,7 +162,7 @@ def process(spark, database, question_table, bucket, keys):
         print(f'ERROR: {e}')
 
         # Move files to error
-        move_files(bucket, keys, actual, f'batch-error/{load_dt}_')
+        to = f'batch-error/{load_dt}_'; move_files(bucket, keys, actual, to); actual = to
 
         # Log
         for key in keys:

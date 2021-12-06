@@ -29,7 +29,7 @@ ___
 
 ## 1. Using Jupyter Notebook
 
-Check the script here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
+> Check the script here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
 
 This script use Python 3 and Pandas library to:
 
@@ -58,7 +58,7 @@ df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['Region']
 
 ![Answers Notebook](answers-notebook.png)
 
-Please, check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
+> Check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
 
 ___
 
@@ -125,6 +125,8 @@ PS1: The script creates the database, if not exists:
 wr.catalog.create_database('weather_prd', exist_ok=True)
 ```
 
+> Check the video of execution here: [https://youtu.be/Yr474u7dc8k](https://youtu.be/Yr474u7dc8k)
+
 ___
 
 ## 3. Batch AWS Solution
@@ -175,6 +177,10 @@ PS2: The script creates the database, if not exists:
 ```python
 spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
 ```
+
+> Check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
+
+For this execution, the parquet and database was dropped. The answer of DynamoDB Table is keeped.
 
 ___
 

@@ -9,10 +9,17 @@ def lambda_handler(event, context):
 
     resp = boto3.client('s3').list_objects_v2(
         Bucket=bucket,
-        Prefix=path
+        Prefix=path,
+        MaxKeys=1000
     )
 
-    if resp['KeyCount'] == 0:
+    keys = list()
+    if 'Contents' in resp:
+        for content in resp['Contents']:
+            if len(content['Key']) > 5 and content['Key'][-4:] == '.csv':
+                keys.append(content['Key'])
+
+    if len(keys) == 0:
         # Cancel execution if no files
 
         boto3.client('stepfunctions').stop_execution(
@@ -21,14 +28,7 @@ def lambda_handler(event, context):
             cause=f'No files were found in the s3://{bucket}/{path}.'
         )
 
-    else:
-        # If files, return bucket and keys
-
-        keys = list()
-        for content in resp['Contents']:
-            keys.append(content['Key'])
-
-        return json.dumps({
-            "Bucket": bucket,
-            "Keys": keys
-        })
+    return json.dumps({
+        "Bucket": bucket,
+        "Keys": keys
+    })

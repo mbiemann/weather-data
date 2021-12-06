@@ -212,6 +212,7 @@ def lambda_handler(event, context):
         size = record['s3']['object']['size']
 
         # Process file
-        process(database, question_table, bucket, key, size)
+        if key != 'event-incoming/' and size > 0:
+            process(database, question_table, bucket, key, size)
 
 #===============================================================================

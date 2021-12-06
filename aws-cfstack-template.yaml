@@ -30,9 +30,18 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Effect: Allow
-                Action: "*"
-                Resource: "*"
+              #======= WARNING ===================
+              #======= WARNING ===================
+              #======= WARNING ===================
+              # DON'T DO THIS                    #
+              - Effect: Allow                    #
+                Action: "*"                      #
+                Resource: "*"                    #
+              # I'm test something new           #
+              # I know this is worst pattern     #
+              #======= WARNING ===================
+              #======= WARNING ===================
+              #======= WARNING ===================
 
   # S3 Bucket for incoming csv and refined parquet
   Bucket:
@@ -148,7 +157,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(15 minutes)
-            Enabled: True
+            Enabled: False
 
 Outputs:
 
