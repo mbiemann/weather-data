@@ -178,7 +178,7 @@ PS2: The script creates the database, if not exists:
 spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
 ```
 
-> Check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
+> Check the video of execution here: [https://youtu.be/pdZlQagFuBY](https://youtu.be/pdZlQagFuBY)
 
 For this execution, the parquet and database was dropped. The answer of DynamoDB Table is keeped.
 
