@@ -19,6 +19,7 @@ echo "Start"
 echo ""
 
 ########## Package #############################################################
+
 echo "CloudFormation Packaging..."
 echo "  Template File = aws-cfstack-template.yaml"
 echo ""
@@ -32,8 +33,9 @@ echo "CloudFormation Package successfully!"
 echo ""
 
 ########## Deploy ##############################################################
+
 echo "CloudFormation Deploying..."
-echo "  Stacke Name = $STACK_NAME"
+echo "  Stack Name = $STACK_NAME"
 echo ""
 
 aws cloudformation deploy --template-file aws-cfstack-template_pkgd.yaml \
@@ -46,6 +48,44 @@ aws cloudformation deploy --template-file aws-cfstack-template_pkgd.yaml \
 echo ""
 echo "CloudFormation Deploy successfully!"
 echo ""
+
+########## Outputs##############################################################
+
+OUTPUTS_JSON=aws-cfstack-outputs.json
+
+echo "Getting CloudFormation Outputs..."
+echo "  Outputs Json Filename = $OUTPUTS_JSON"
+echo ""
+
+aws cloudformation describe-stacks --stack-name $STACK_NAME | \
+    jq -r '.Stacks[0].Outputs' > $OUTPUTS_JSON ; cat $OUTPUTS_JSON
+
+BUCKET_NAME=$(jq -r '.[] | select(.OutputKey == "BucketName") | .OutputValue' $OUTPUTS_JSON)
+echo "  Bucket Name = $BUCKET_NAME"
+
+echo ""
+echo "Get CloudFormation Outputs successfully!"
+echo ""
+
+################################################################################
+
+echo "Copying batch artifacts to bucket..."
+echo ""
+
+aws s3 cp ./aws-batch/glue_script.py s3://$BUCKET_NAME/batch-artifacts/glue_script.py
+
+echo ""
+
+################################################################################
+
+# echo "Copying test data to bucket..."
+# echo ""
+
+# aws s3 cp ./test-data/ s3://$BUCKET_NAME/event-incoming/ --recursive
+
+# aws s3 cp ./test-data/ s3://$BUCKET_NAME/batch-incoming/ --recursive
+
+# echo ""
 
 ################################################################################
 

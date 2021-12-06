@@ -10,13 +10,48 @@ Parameters:
 
 Resources:
 
+  # Shared Role for all resources
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-${AWS::Region}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+                - lambda.amazonaws.com
+                - states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: admin
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+
   # S3 Bucket for incoming csv and refined parquet
   Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub weather-data-${Environment}-${AWS::AccountId}-${AWS::Region}
 
-  # Lambda Function trigged by S3 Event on incoming-event directory
+  # DynamoDB Table for store questions and anwsers
+  QuestionTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub weather-data-${Environment}-${AWS::AccountId}-${AWS::Region}
+      PrimaryKey:
+        Name: question
+        Type: String
+
+  ### EVENT DRIVEN Resources ###################################################
+
+  # Lambda Function trigged by S3 Event on event-incoming directory
   EventRefineFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -24,21 +59,18 @@ Resources:
       CodeUri: ./aws-event-driven
       Handler: lambda_function.lambda_handler
       Runtime: python3.8
-      Timeout: 900
+      Role: !Sub ${Role.Arn}
+      MemorySize: 256
+      Timeout: 300
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 60
         MaximumRetryAttempts: 0
       Environment:
         Variables:
-          ENVIRONMENT: !Ref Environment
+          DATABASE: !Sub weather_${Environment}
+          TABLE: !Ref QuestionTable
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSDataWrangler-Python38:1
-      Policies:
-        - Version: 2012-10-17
-          Statement:
-            - Effect: Allow
-              Action: "*"
-              Resource: "*"
       Events:
         S3Event:
           Type: S3
@@ -50,3 +82,75 @@ Resources:
                 Rules:
                   - Name: prefix
                     Value: event-incoming
+
+  ### BATCH Resources ##########################################################
+
+  # Glue Job scheduled each 15 minutes
+  BatchRefineJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub ${AWS::StackName}-batch-process
+      Description: Process weather data in batch mode to parquet with Apache Spark
+      Role: !Sub ${Role.Arn}
+      Timeout: 15
+      MaxRetries: 0
+      MaxCapacity: 2
+      GlueVersion: 3.0
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${Bucket}/batch-artifacts/glue_script.py
+      DefaultArguments:
+        --enable-glue-datacatalog: 'true'
+        --enable-s3-parquet-optimized-committer: 'true'
+        --DATABASE: !Sub weather_${Environment}
+        --TABLE: !Ref QuestionTable
+
+  # Lambda Function to check files in batch-incoming directory
+  CheckForFilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Check for files in batch incoming directory
+      CodeUri: ./aws-batch
+      Handler: lambda_check_for_files.lambda_handler
+      Runtime: python3.8
+      Role: !Sub ${Role.Arn}
+      Environment:
+        Variables:
+          BUCKET: !Ref Bucket
+
+  # Step Function to execute Glue Job
+  BatchStepFunction:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub ${AWS::StackName}-batch-process
+      Type: STANDARD
+      Role: !Sub ${Role.Arn}
+      Definition:
+        StartAt: CheckForFiles
+        States:
+          CheckForFiles:
+            Type: Task
+            Resource: !Sub ${CheckForFilesFunction.Arn}
+            Parameters:
+              ExecutionId.$: $$.Execution.Id
+            ResultPath: $.Content
+            Next: BatchJob
+          BatchJob:
+            Type: Task
+            Resource: arn:aws:states:::glue:startJobRun.sync
+            Parameters:
+              JobName: !Ref BatchRefineJob
+              Arguments:
+                "--CONTENT.$": $.Content
+            End: True
+      Events:
+        Each15min:
+          Type: Schedule
+          Properties:
+            Schedule: rate(15 minutes)
+            Enabled: False
+
+Outputs:
+
+  BucketName:
+    Value: !Ref Bucket
