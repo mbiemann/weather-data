@@ -71,6 +71,8 @@ b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#
 size >= 11000000 # in bytes
 ```
 
+Only for example purposes, the Lambda MemorySize is set to 256.
+
 c. Load CSV file using [AWS Data Wrangler](https://github.com/awslabs/aws-data-wrangler)
 ```python
 df = wr.s3.read_csv('s3://bucket/key')
