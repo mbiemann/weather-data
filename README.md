@@ -2,7 +2,7 @@
 
 This project aims to answer some questions about weather data from csv files, using Python and Data Engineering.
 
-> This project was made with care and dedication in a couple of days. Any questions or improvements send me a problem, I'll be happy to talk to you 😀! Thank you and enjoy 🖤
+> I made this with care and dedication in a couple of days. Any questions or improvements create a Issue, I'll be happy to improuve and talk to you 😀! Thanks and enjoy 🖤
 
 There are many ways to get the answers, but here is the three ways chosen for this repository:
 
