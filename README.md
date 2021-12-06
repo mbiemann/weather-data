@@ -61,29 +61,29 @@ Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/
 
 This solution uses the S3 Bucket Event Triggering Mechanism to invoke a Lambda that:
 
-a. Validate if the filename ends with '.csv'
+a. Validate if the filename ends with '.csv':
 ```python
 key[-4:] != '.csv'
 ```
 
-b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#3-batch-solution-in-aws))
+b. Validate if the file size is up to 10.49 MB (if larger, use [Batch Process](#3-batch-solution-in-aws)):
 ```python
 size >= 11000000 # in bytes
 ```
 
 Only for example purposes, the Lambda MemorySize is set to 256.
 
-c. Load CSV file using [AWS Data Wrangler](https://github.com/awslabs/aws-data-wrangler)
+c. Load CSV file using [AWS Data Wrangler](https://github.com/awslabs/aws-data-wrangler):
 ```python
 df = wr.s3.read_csv('s3://bucket/key')
 ```
 
-d. Check expected columns
+d. Check expected columns:
 ```python
 df.columns.to_list() != ['ForecastSiteCode','ObservationTime','ObservationDate','WindDirection','WindSpeed','WindGust','Visibility','ScreenTemperature','Pressure','SignificantWeatherCode','SiteName','Latitude','Longitude','Region','Country']
 ```
 
-e. Write and Catalog Parquet:
+e. Write (in S3) and Catalog (in Glue Data Catalog) Parquet:
 ```python
 wr.s3.to_parquet(
     df=df,
@@ -95,7 +95,7 @@ wr.s3.to_parquet(
 )
 ```
 
-f. Calculates the highest temperature, compares with the previous answer if any, and saves the answers in the dynamodb question table
+f. Calculate the highest temperature, compares with the previous answer if exists, and save in the Question DynamoDB Table:
 ```python
 df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
         TableName='question-table',
