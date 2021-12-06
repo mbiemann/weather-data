@@ -18,9 +18,9 @@ The questions are:
 
 - In which region was the hottest day?
 
-For AWS Solution, the answers can be seen in the [DynamoDB Table](#dynamodb-table).
-
 The csv files used for test are in [./test-data](test-data) folder.
+
+For AWS Solutions, the answers can be seen in the [DynamoDB Table](#dynamodb-table). Check the [AWS Deployment](#aws-deployment) instructions..
 
 ___
 
@@ -179,3 +179,28 @@ ___
 ## Query Data using Athena and Glue Data Catalog
 
 
+___
+
+## AWS Deployment
+
+The AWS Solutions was made as IaC (Infrastructure as Code).
+
+Follow the steps below for deployment:
+
+1. Make sure have a [AWS Account](https://aws.amazon.com).
+
+2. Install and configure the [AWS CLI](https://aws.amazon.com/cli/).
+
+3. Create a S3 Bucket used for package CloudFormation template:
+
+```bash
+% bash aws s3 mb s3://bucket-name
+```
+
+4. Check the [CloudFormation template](aws-cfstack-template.yaml) (no action needed here).
+
+5. Execute the [./aws-cfstack-deploy.sh](aws-cfstack-deploy.sh) shell script:
+
+```bash
+% bash aws-cfstack-deploy.sh env bucket-name
+```
