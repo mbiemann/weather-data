@@ -20,17 +20,66 @@ from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 
-from pyspark.sql.functions import col, lit
+from pyspark.sql.functions import col, lit, max
+
+#===============================================================================
+
+def set_answer(table, question, answer):
+
+    boto3.client('dynamodb').put_item(
+        TableName=table,
+        Item={
+            'question':{'S':question},
+            'answer':{'S':answer}
+        }
+    )
+
+#===============================================================================
+
+def get_answer(table, question, default):
+    answer = default
+
+    try:
+        answer = boto3.client('dynamodb').get_item(
+            TableName=table,
+            Key={'question':{'S':question}},
+            ConsistentRead=True
+        )['Item']['answer']['S']
+    except Exception as e:
+        print(f'Get Item ERROR: {e}')
+
+    return answer
 
 #===============================================================================
 
 def answer_questions(table, df):
     print('Answering questions...')
 
-    new_temp = df.select(col('ScreenTemperature')).max().collect()[0]
+    # get new and old high temperature
+    new_temp = df.select(col('ScreenTemperature').cast('float')).groupBy().max().first()[0]
+    old_temp = float(get_answer( table, 'What was the temperature on that day?', 0 ))
 
-    print('NEW TEMP')
-    print(new_temp)
+    # if new is highest than old
+    if new_temp > old_temp:
+
+        # filter record with highest temperature
+        df = df.filter(col('ScreenTemperature').cast('float') == new_temp)
+
+        # get date and region
+        new_date = df.select(col('ObservationDate')).first()[0][:10]
+        new_regn = df.select(col('Region')).first()[0]
+
+        # update table
+        set_answer( table, 'What was the temperature on that day?', "{:.2f}".format(new_temp) )
+        set_answer( table, 'Which date was the hottest day?', new_date )
+        set_answer( table, 'In which region was the hottest day?', new_regn )
+
+        print('Answered questions!')
+
+    else:
+
+        print('None questions updated!')
+
 
 #===============================================================================
 
@@ -69,15 +118,18 @@ def process(spark, database, question_table, bucket, keys):
     # Load Datetime Isoformat
     load_dt = datetime.datetime.utcnow().isoformat()
 
-    # Move files to in-progress
-    move_files(bucket, keys, 'batch-incoming/', f'batch-in-progress/{load_dt}_')
+    actual = 'batch-incoming/'
 
     try:
         df = None
 
+        # Move files to in-progress
+        move_files(bucket, keys, actual, f'batch-in-progress/{load_dt}_')
+        actual = f'batch-in-progress/{load_dt}_'
+
         # Read files
         for key in keys:
-            key = key.replace('batch-incoming/', f'batch-in-progress/{load_dt}_')
+            key = key.replace('batch-incoming/', actual)
 
             # Read CSV
             df_read = spark.read \
@@ -105,7 +157,8 @@ def process(spark, database, question_table, bucket, keys):
             .saveAsTable(f'{database}.observation')
 
         # Move files to processed
-        move_files(bucket, keys, f'batch-in-progress/{load_dt}_', f'batch-processed/{load_dt}_')
+        move_files(bucket, keys, actual, f'batch-processed/{load_dt}_')
+        actual = f'batch-processed/{load_dt}_'
 
         # Answer Questions
         answer_questions(question_table, df)
@@ -117,7 +170,7 @@ def process(spark, database, question_table, bucket, keys):
         print(f'ERROR: {e}')
 
         # Move files to error
-        move_files(bucket, keys, f'batch-in-progress/{load_dt}_', f'batch-error/{load_dt}_')
+        move_files(bucket, keys, actual, f'batch-error/{load_dt}_')
 
         # Log
         for key in keys:
