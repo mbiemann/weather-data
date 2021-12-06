@@ -131,3 +131,5 @@ dmypy.json
 aws-cfstack-template_pkgd.yaml
 .DS_Store
 aws-cfstack-outputs.json
+
+result/weather.parquet

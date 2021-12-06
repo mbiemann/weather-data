@@ -95,7 +95,7 @@ wr.s3.to_parquet(
 )
 ```
 
-f. Calculate the highest temperature, compares with the previous answer if exists, and save in the Question DynamoDB Table:
+f. Calculate the highest temperature, compares with the previous answer if exists, and save in the [Question DynamoDB Table](#answers-in-question-dynamodb-table):
 ```python
 df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
         TableName='question-table',
@@ -105,6 +105,11 @@ df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
 ```
 
 PS: To demonstrate and track processing, the file is moved from the `event-incoming` folder to the `event-in-progress` folder. After writing the parquet, the file is moved to the `event-processed` folder. In case of error, the file is moved to the `event-error` folder along with a `.log` file with the error message.
+
+PS1: The script creates the database, if not exists:
+```python
+wr.catalog.create_database('weather_prd', exist_ok=True)
+```
 
 ___
 
@@ -116,15 +121,42 @@ Check the script here: [./aws-batch/glue-script.py](aws-batch/glue-script.py).
 
 This batch process is scheduled each 15 minutes using EventBridge, that triggers the Step Function's state machine.
 
-In Step Function, the first step is a simple Lambda that check if exists file to process.
+![Step Function](aws-batch/step-function-print.png)
 
-The next step is to start the Glue Job, passing the bucket and the list of files to be processed as parameter.
+In Step Function, the first step is a simple Lambda that check if exists file to process. The next step is to start the Glue Job, passing the bucket and the list of files to be processed as parameter and do:
 
-The Glue Job script do:
+a. Load multiple CSV files into Spark DataFrame:
+```python
+df = None
+for key in keys:
+    df_read = spark.read.csv(f's3:://bucket/{key}')
+    df = df_read if df == None else df.unionAll(df_read)
+```
 
-a. xxx
+b. Write (in S3) and Catalog (in Glue Data Catalog) Parquet:
+```python
+df.write \
+    .format('parquet') \
+    .option('path','s3://bucket/refined/') \
+    .mode('append') \
+    .saveAsTable('weather_prd.observation')
+```
+
+c. Calculate the highest temperature, compares with the previous answer if exists, and save in the [Question DynamoDB Table](#answers-in-question-dynamodb-table):
+```python
+df.select(col('ScreenTemperature')).max().collect()[0] > float(boto3.client('dynamodb').get_item(
+        TableName='question-table',
+        Key={'question':{'S':'What was the temperature on that day?'}},
+        ConsistentRead=True
+    )['Item']['answer']['S']))
+```
 
 PS: To demonstrate and track processing, the file is moved from the `batch-incoming` folder to the `batch-in-progress` folder. After writing the parquet, the file is moved to the `batch-processed` folder. In case of error, the file is moved to the `batch-error` folder along with a `.log` file with the error message.
+
+PS1: The script creates the database, if not exists:
+```python
+spark.sql('CREATE DATABASE IF NOT EXISTS weather_prd')
+```
 
 ___
 
