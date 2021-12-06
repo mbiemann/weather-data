@@ -4,11 +4,11 @@ This project aims to answer some questions about weather data from csv files, us
 
 There are three ways to get to the answers in this repository:
 
-1. Using Jupyter Notebook
+1. [Using Jupyter Notebook](#1-using-jupyter-notebook)
 
-2. Event-driven Solution in AWS
+2. [Event-driven Solution in AWS](#2-event-driven-solution-in-aws)
 
-3. Batch Solution in AWS
+3. [Batch Solution in AWS](#3-batch-solution-in-aws)
 
 The questions to answer are:
 
@@ -24,7 +24,7 @@ ___
 
 ## 1. Using Jupyter Notebook
 
-Check the Jupyter Notebook here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
+Check the notebook with the answers here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
 
 This script use Python 3 and Pandas library to:
 
