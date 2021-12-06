@@ -57,7 +57,7 @@ ___
 
 Check the script here: [./aws-event-driven/lambda_function.py](aws-event-driven/lambda_function.py).
 
-![AWS Diagram Event-Driven](aws-event-driven/aws-diagram-event-driven.png)
+![AWS Event-Driven Diagram](aws-event-driven/aws-diagram-event-driven.png)
 
 This solution uses the S3 Bucket Event Triggering Mechanism to invoke a Lambda that:
 
@@ -110,8 +110,28 @@ ___
 
 ## 3. Batch Solution in AWS
 
-Python Script uses for this solution is [aws-batch/glue-script.py](aws-batch/glue-script.py).
+Check the script here: [./aws-batch/glue-script.py](aws-batch/glue-script.py).
 
-![AWS Diagram Batch](aws-batch/aws-diagram-batch.png)
+![AWS Batch Diagram](aws-batch/aws-diagram-batch.png)
+
+This batch process is scheduled each 15 minutes using EventBridge, that triggers the Step Function's state machine.
+
+In Step Function, the first step is a simple Lambda that check if exists file to process.
+
+The next step is to start the Glue Job, passing the bucket and the list of files to be processed as parameter.
+
+The Glue Job script do:
+
+a. xxx
 
 PS: To demonstrate and track processing, the file is moved from the `batch-incoming` folder to the `batch-in-progress` folder. After writing the parquet, the file is moved to the `batch-processed` folder. In case of error, the file is moved to the `batch-error` folder along with a `.log` file with the error message.
+
+___
+
+## Answers in Question DynamoDB Table
+
+___
+
+## Query Data using Athena and Glue Data Catalog
+
+
