@@ -43,6 +43,3 @@ ___
 Python Script uses for this solution is [aws-batch/glue-script.py](aws-batch/glue-script.py).
 
 ![AWS Diagram Batch](aws-batch/aws-diagram-batch.png)
-
-___
-
