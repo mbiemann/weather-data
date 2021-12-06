@@ -111,7 +111,8 @@ df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
     )['Item']['answer']['S']))
 ```
 
-When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed. The file `weather.20160301.csv` is to larger (in this example) to proccess with Lambda, and the awnsers will be:
+When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed.
+The file `weather.20160301.csv` is to larger (in this example) to proccess with Lambda, and the awnsers will be:
 
 ![Answers DynamoDB](answers-dynamodb.png)
 
@@ -177,9 +178,13 @@ ___
 
 ## DynamoDB Table
 
-Both AWS Solution write the answers in same DynamoDB Table, that can be used in RestAPI, for example.
+Both AWS Solution write the answers in same DynamoDB Table.
 
-![Answers DynamoDB](answers-dynamodb.png)
+This is the final result, after runs the Event-driven and Batch process:
+
+![Answers DynamoDB Final](answers-dynamodb-final.png)
+
+This DynamoDB Table can be used in RestAPI to delivery a fast data to a application, for example.
 
 ___
 
