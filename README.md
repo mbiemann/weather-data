@@ -18,15 +18,38 @@ The questions to answer are:
 
 - In which region was the hottest day?
 
-There are some test csv files on [./test-data](test-data).
-
-
+The csv files used for test are in [./test-data](test-data) folder.
 
 ___
 
 ## 1. Using Jupyter Notebook
 
-The script to get to the answers using Jupyter Notebook is in the folder [notebook](notebook/weather-with-pandas.ipynb).
+Check the Jupyter Notebook here: [./notebook/weather-with-pandas.ipynb](notebook/weather-with-pandas.ipynb).
+
+This script use Python 3 and Pandas library to:
+
+a. Read csv files and Union dataframes:
+```python
+df1 = pd.read_csv('filename1.csv')
+df2 = pd.read_csv('filename2.csv')
+df = df1.append(df2)
+```
+
+b. Convert csv to parquet:
+```python
+df.to_parquet('filename.parquet')
+df = pd.read_parquet('filename.parquet')
+```
+
+c. Get the answers:
+```python
+# What was the temperature on that day?
+df['ScreenTemperature'].max()
+# Which date was the hottest day?
+df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['ObservationDate']
+# In which region was the hottest day?
+df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['Region']
+```
 
 ___
 
