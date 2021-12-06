@@ -114,7 +114,7 @@ df['screen_temperature'].max() > float(boto3.client('dynamodb').get_item(
 When executes this solution first using [./test-data](test-data), only the file `weather.20160201.csv` is processed.
 The file `weather.20160301.csv` is to larger (in this example) to proccess with Lambda, and the awnsers will be:
 
-![Answers DynamoDB](answers-dynamodb.png)
+![Answers DynamoDB Lambda](answers-dynamodb-lambda.png)
 
 PS: To demonstrate and track processing, the file is moved from the `event-incoming` folder to the `event-in-progress` folder. After writing the parquet, the file is moved to the `event-processed` folder. In case of error, the file is moved to the `event-error` folder along with a `.log` file with the error message.
 
