@@ -194,12 +194,12 @@ Follow the steps below for deployment:
 3. Create a S3 Bucket used for package CloudFormation template:
 
 ```bash
-% bash aws s3 mb s3://bucket-name
+% aws s3 mb s3://bucket-name
 ```
 
 4. Check the [CloudFormation template](aws-cfstack-template.yaml) (no action needed here).
 
-5. Execute the [./aws-cfstack-deploy.sh](aws-cfstack-deploy.sh) shell script:
+5. Execute the [./aws-cfstack-deploy.sh](aws-cfstack-deploy.sh) shell script, passing the environment (like dev or prd) and bucket-name (created at step 3):
 
 ```bash
 % bash aws-cfstack-deploy.sh env bucket-name
