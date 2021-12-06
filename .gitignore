@@ -133,3 +133,4 @@ aws-cfstack-template_pkgd.yaml
 aws-cfstack-outputs.json
 
 result/weather.parquet
+videos/jupyter.mov

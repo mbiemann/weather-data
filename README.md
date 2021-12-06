@@ -58,6 +58,8 @@ df[ df['ScreenTemperature'] == df['ScreenTemperature'].max() ]['Region']
 
 ![Answers Notebook](answers-notebook.png)
 
+Please, check the video of execution here: [https://youtu.be/8iB7AEuzv7s](https://youtu.be/8iB7AEuzv7s)
+
 ___
 
 ## 2. Event-driven AWS Solution

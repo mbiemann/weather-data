@@ -199,7 +199,10 @@ def lambda_handler(event, context):
     question_table = os.environ['QUESTION_TABLE']
 
     # Create database if not exists
-    wr.catalog.create_database(database, exist_ok=True)
+    try:
+        wr.catalog.create_database(database, exist_ok=True)
+    except Exception as e:
+        print(f'Create Database ERROR: {e}')
 
     # Loop on records
     for record in event['Records']:
